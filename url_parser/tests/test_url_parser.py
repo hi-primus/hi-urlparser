@@ -191,6 +191,15 @@ class TestUrlParser(TestCase):
         self.assertEqual(result['sub_domain'], 'test.com.hello')
         self.assertEqual(result['query']['my_query_domain'], 'www.test.com')
 
+    def test_finds_port(self):
+        url = 'mysubdomain.example.com:80'
+        result = url_parser.parse_url(url)
+        self.assertEqual(result['port'], '80')
+
+        url = 'mysubdomain.example.com:80#anchor'
+        result = url_parser.parse_url(url)
+        self.assertEqual(result['port'], '80')
+
 
 class TestGetUrl(TestCase):
     def test_parses_url_without_www(self):
@@ -404,3 +413,4 @@ class TestGetBasicUrl(TestCase):
         url = 'example.com/path/to/wisdom?query=2&this=3'
         result = url_parser.get_base_url(url)
         self.assertEqual(result, 'http://example.com')
+
