@@ -11,6 +11,7 @@ UrlObject = namedtuple(
         'sub_domain',
         'domain',
         'top_domain',
+        'port',
         'path',
         'dir',
         'file',
@@ -36,18 +37,18 @@ def _split_query_group(query_groups: list) -> dict:
 
 def _parse_url_with_top_domain(url, top_domain):
     regex = r"^(?:(?P<protocol>[\w\d]+)(?:\:\/\/))?" \
-                  r"(?P<sub_domain>" \
-                  r"(?P<www>(?:www)?)(?:\.?)" \
-                  r"(?:(?:[\w\d-]+|\.)*?)?" \
-                  r")(?:\.?)" \
-                  r"(?P<domain>[^./]+(?=\.))\." \
-                  r"(?P<top_domain>" + re.escape(top_domain) + r"(?![^/?#]))" \
-                  r"(?P<path>" \
-                  r"(?P<dir>\/(?:[^/\r\n]+(?:/))+)?" \
-                  r"(?:\/?)(?P<file>[^?#\r\n]+)?" \
-                  r")?" \
-                  r"(?:\#(?P<fragment>[^#?\r\n]*))?" \
-                  r"(?:\?(?P<query>.*(?=$)))*$"
+            r"(?P<sub_domain>" \
+            r"(?P<www>(?:www)?)(?:\.?)" \
+            r"(?:(?:[\w\d-]+|\.)*?)?" \
+            r")(?:\.?)" \
+            r"(?P<domain>[^./]+(?=\.))\." \
+            r"(?P<top_domain>" + re.escape(top_domain) + r"(?![^/|:?#]))\:?" \
+                                                         r"(?P<port>\d+)?" \
+                                                         r"(?P<path>" \
+                                                         r"(?P<dir>\/(?:[^/\r\n]+(?:/))+)?" \
+                                                         r"(?:\/?)(?P<file>[^?#\r\n]+)?)?" \
+                                                         r"(?:\#(?P<fragment>[^#?\r\n]*))?" \
+                                                         r"(?:\?(?P<query>.*(?=$)))*$"
 
     dict_data = {
         'protocol': None,
@@ -55,13 +56,13 @@ def _parse_url_with_top_domain(url, top_domain):
         'sub_domain': None,
         'domain': None,
         'top_domain': None,
+        'port': None,
         'path': None,
         'dir': None,
         'file': None,
         'fragment': None,
         'query': None,
     }
-
     match = re.search(regex, url)
 
     dict_data['protocol'] = match.group('protocol') if match.group('protocol') else None
@@ -69,11 +70,11 @@ def _parse_url_with_top_domain(url, top_domain):
     dict_data['sub_domain'] = match.group('sub_domain') if match.group('sub_domain') else None
     dict_data['domain'] = match.group('domain')
     dict_data['top_domain'] = top_domain
+    dict_data['port'] = match.group('port') if match.group('port') else None
     dict_data['path'] = match.group('path') if match.group('path') else None
     dict_data['dir'] = match.group('dir') if match.group('dir') else None
     dict_data['file'] = match.group('file') if match.group('file') else None
     dict_data['fragment'] = match.group('fragment') if match.group('fragment') else None
-
     query = match.group('query') if match.group('query') else None
 
     if query is not None:
@@ -88,7 +89,7 @@ def _parse_url_with_public_suffix(url):
     public_suffix = PublicSuffixList.get_list()
     public_suffix.sort()
 
-    domain_regex = r"(?:^|\/)(?P<domain>[^:/#?]+)(?:[/#?]|$)"
+    domain_regex = r"(?:^|\/)(?P<domain>[^:/#?]+)(?:[/#?]|$)?\:?(?P<port>\d+)"
     match = re.search(domain_regex, url)
     domain = match.group('domain')
     domain_parts = domain.split('.')
@@ -104,7 +105,6 @@ def _parse_url_with_public_suffix(url):
             break
 
     data = _parse_url_with_top_domain(url, top_domain)
-
     return data
 
 
@@ -125,6 +125,7 @@ def get_url(url: str) -> UrlObject:
         sub_domain=data['sub_domain'],
         domain=data['domain'],
         top_domain=data['top_domain'],
+        port=data['port'],
         path=data['path'],
         dir=data['dir'],
         file=data['file'],
