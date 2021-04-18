@@ -36,6 +36,7 @@ def _split_query_group(query_groups: list) -> dict:
 
 
 def _parse_url_with_top_domain(url, top_domain):
+
     regex = r"^(?:(?P<protocol>[\w\d]+)(?:\:\/\/))?" \
             r"(?P<sub_domain>" \
             r"(?P<www>(?:www)?)(?:\.?)" \
@@ -89,8 +90,9 @@ def _parse_url_with_public_suffix(url):
     public_suffix = PublicSuffixList.get_list()
     public_suffix.sort()
 
-    domain_regex = r"(?:^|\/)(?P<domain>[^:/#?]+)(?:[/#?]|$)?\:?(?P<port>\d+)"
+    domain_regex = r"^(.+:\/\/)?(?:[^@\/\n]+@)?(:www\.)?(?P<domain>[^:\/#?\n]+)"
     match = re.search(domain_regex, url)
+
     domain = match.group('domain')
     domain_parts = domain.split('.')
 
