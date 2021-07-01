@@ -3,128 +3,109 @@ import warnings
 
 from url_parser.public_suffix_list import PublicSuffixList
 
+public_suffix = PublicSuffixList.get_list()
+public_suffix.sort()
 
-class UrlObject:
-    def __init__(self):
+def _split_query_group(query_groups: list) -> dict:
+    result = dict()
 
-        public_suffix = PublicSuffixList.get_list()
-        public_suffix.sort()
-        self.public_suffix = public_suffix
+    for query_group in query_groups:
+        query = query_group.split('=')
 
-    @staticmethod
-    def _split_query_group(query_groups: list) -> dict:
-        result = dict()
+        if len(query) == 1:
+            result[query[0]] = None
+            continue
 
-        for query_group in query_groups:
-            query = query_group.split('=')
+        result[query[0]] = query[1]
 
-            if len(query) == 1:
-                result[query[0]] = None
-                continue
+    return result
 
-            result[query[0]] = query[1]
+def _parse_url_with_top_domain(url, top_domain):
 
-        return result
+    regex = r"^(?:(?P<protocol>[\w\d]+)(?:\:\/\/))?" \
+            r"(?P<sub_domain>" \
+            r"(?:(?:[\w\d-]+|\.)*?)?" \
+            r")(?:\.?)" \
+            r"(?P<domain>[^./]+(?=\.))\." \
+            r"(?P<top_domain>" + re.escape(top_domain) + r"(?![^/|:?#]))\:?" \
+                                                            r"(?P<port>\d+)?" \
+                                                            r"(?P<path>" \
+                                                            r"(?P<dir>\/(?:[^/\r\n]+(?:/))+)?" \
+                                                            r"(?:\/?)(?P<file>[^?#\r\n]+)?)?" \
+                                                            r"(?:\#(?P<fragment>[^#?\r\n]*))?" \
+                                                            r"(?:\?(?P<query>.*(?=$)))*$"
 
-    @staticmethod
-    def _parse_url_with_top_domain(url, top_domain):
+    dict_data = {
+        'protocol': None,
+        'sub_domain': None,
+        'domain': None,
+        'top_domain': None,
+        'port': None,
+        'path': None,
+        'dir': None,
+        'file': None,
+        'fragment': None,
+        'query': None,
+    }
+    match = re.search(regex, url)
 
-        regex = r"^(?:(?P<protocol>[\w\d]+)(?:\:\/\/))?" \
-                r"(?P<sub_domain>" \
-                r"(?P<www>(?:www)?)(?:\.?)" \
-                r"(?:(?:[\w\d-]+|\.)*?)?" \
-                r")(?:\.?)" \
-                r"(?P<domain>[^./]+(?=\.))\." \
-                r"(?P<top_domain>" + re.escape(top_domain) + r"(?![^/|:?#]))\:?" \
-                                                             r"(?P<port>\d+)?" \
-                                                             r"(?P<path>" \
-                                                             r"(?P<dir>\/(?:[^/\r\n]+(?:/))+)?" \
-                                                             r"(?:\/?)(?P<file>[^?#\r\n]+)?)?" \
-                                                             r"(?:\#(?P<fragment>[^#?\r\n]*))?" \
-                                                             r"(?:\?(?P<query>.*(?=$)))*$"
+    dict_data['protocol'] = match.group('protocol') if match.group('protocol') else None
+    dict_data['sub_domain'] = match.group('sub_domain') if match.group('sub_domain') else None
+    dict_data['domain'] = match.group('domain')
+    dict_data['top_domain'] = top_domain
+    dict_data['port'] = match.group('port') if match.group('port') else None
+    dict_data['path'] = match.group('path') if match.group('path') else None
+    dict_data['dir'] = match.group('dir') if match.group('dir') else None
+    dict_data['file'] = match.group('file') if match.group('file') else None
+    dict_data['fragment'] = match.group('fragment') if match.group('fragment') else None
+    query = match.group('query') if match.group('query') else None
 
-        dict_data = {
-            'protocol': None,
-            'www': None,
-            'sub_domain': None,
-            'domain': None,
-            'top_domain': None,
-            'port': None,
-            'path': None,
-            'dir': None,
-            'file': None,
-            'fragment': None,
-            'query': None,
-        }
-        match = re.search(regex, url)
+    if query is not None:
+        query_groups = query.split('&')
+        query = _split_query_group(query_groups)
+        dict_data['query'] = query
 
-        dict_data['protocol'] = match.group('protocol') if match.group('protocol') else None
-        dict_data['www'] = match.group('www') if match.group('www') else None
-        dict_data['sub_domain'] = match.group('sub_domain') if match.group('sub_domain') else None
-        dict_data['domain'] = match.group('domain')
-        dict_data['top_domain'] = top_domain
-        dict_data['port'] = match.group('port') if match.group('port') else None
-        dict_data['path'] = match.group('path') if match.group('path') else None
-        dict_data['dir'] = match.group('dir') if match.group('dir') else None
-        dict_data['file'] = match.group('file') if match.group('file') else None
-        dict_data['fragment'] = match.group('fragment') if match.group('fragment') else None
-        query = match.group('query') if match.group('query') else None
+    return dict_data
 
-        if query is not None:
-            query_groups = query.split('&')
-            query = UrlObject._split_query_group(query_groups)
-            dict_data['query'] = query
+def _parse_url_with_public_suffix(url):
 
-        return dict_data
+    domain_regex = re.compile(r"^(.+://)?(?:[^@/\n]+@)?(?P<domain>[^:/#?\n]+)", re.IGNORECASE)
+    match = re.search(domain_regex, url)
 
-    def _parse_url_with_public_suffix(self, url):
+    domain = match.group('domain')
+    domain_parts = domain.split('.')
 
-        domain_regex = re.compile(r"^(.+://)?(?:[^@/\n]+@)?(:www\.)?(?P<domain>[^:/#?\n]+)", re.IGNORECASE)
-        match = re.search(domain_regex, url)
+    top_domain = None
 
-        domain = match.group('domain')
-        domain_parts = domain.split('.')
+    for i in range(len(domain_parts)):
+        tail_gram = domain_parts[i:len(domain_parts)]
+        tail_gram = '.'.join(tail_gram)
 
-        top_domain = None
+        if tail_gram in public_suffix:
+            top_domain = tail_gram
+            break
 
-        for i in range(len(domain_parts)):
-            tail_gram = domain_parts[i:len(domain_parts)]
-            tail_gram = '.'.join(tail_gram)
+    data = _parse_url_with_top_domain(url, top_domain)
+    return data
 
-            if tail_gram in self.public_suffix:
-                top_domain = tail_gram
-                break
+def get_base_url(url: str) -> str:
+    url = parse_url(url)
+    protocol = str(url.protocol) + '://' if url.protocol is not None else 'http://'
+    sub_domain = str(url.sub_domain) + '.' if url.sub_domain is not None else ''
+    return protocol + sub_domain + url.domain + '.' + url.top_domain
 
-        data = UrlObject._parse_url_with_top_domain(url, top_domain)
-        return data
+def parse_url(url: str):
+    data = _parse_url_with_public_suffix(url)
 
-    def get_base_url(self, url: str) -> str:
-        url = self.get_url(url)
-        protocol = str(url.protocol) + '://' if url.protocol is not None else 'http://'
-        www = 'www.' if url.www is not None else ''
-        sub_domain = str(url.sub_domain) + '.' if url.sub_domain is not None and url.sub_domain != 'www.' else ''
-        return protocol + www + sub_domain + url.domain + '.' + url.top_domain
+    return {
+        "protocol": data['protocol'],
+        "sub_domain": data['sub_domain'],
+        "domain": data['domain'],
+        "top_domain": data['top_domain'],
+        "port": data['port'],
+        "path": data['path'],
+        "dir": data['dir'],
+        "file": data['file'],
+        "fragment": data['fragment'],
+        "query": data['query']}
 
-    def get_url(self, url: str):
-        data = self._parse_url_with_public_suffix(url)
-
-        return {
-            "protocol": data['protocol'],
-            "www": data['www'],
-            "sub_domain": data['sub_domain'],
-            "domain": data['domain'],
-            "top_domain": data['top_domain'],
-            "port": data['port'],
-            "path": data['path'],
-            "dir": data['dir'],
-            "file": data['file'],
-            "fragment": data['fragment'],
-            "query": data['query']}
-
-    def parse_url(self, url: str) -> dict:
-        warnings.warn(
-            "parse_url is deprecated, use get_url instead",
-            DeprecationWarning
-        )
-
-        return self.get_url(url)

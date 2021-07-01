@@ -1,5 +1,9 @@
 ### Changelog:
 
+##### v3.0.3-optimus
+* Removed `UrlObject` class
+* Removed `www` value
+
 ##### v3.0.3
 * Fixed catastrophic backtracking and a small top domain bug.
 
