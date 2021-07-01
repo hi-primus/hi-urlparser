@@ -130,7 +130,7 @@ def _parse_url_with_public_suffix(url):
 
     if top_domain:
         data = _parse_url_with_top_domain(url, top_domain)
-        host = (data["sub_domain"] + ".") if "sub_domain" in data else ""
+        host = (data["sub_domain"] + ".") if data["sub_domain"] else ""
         host += data["domain"] + "." + top_domain
         data["host"] = host
         return data
