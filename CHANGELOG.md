@@ -1,5 +1,8 @@
 ### Changelog:
 
+##### v3.0.3-optimus1
+* Included `host` value
+
 ##### v3.0.3-optimus
 * Removed `UrlObject` class
 * Removed `www` value
