@@ -6,6 +6,20 @@ from url_parser.public_suffix_list import PublicSuffixList
 public_suffix = PublicSuffixList.get_list()
 public_suffix.sort()
 
+DICT_NONE = {
+    'protocol': None,
+    'sub_domain': None,
+    'domain': None,
+    'top_domain': None,
+    'host': None,
+    'port': None,
+    'path': None,
+    'dir': None,
+    'file': None,
+    'fragment': None,
+    'query': None
+}
+
 def _split_query_group(query_groups: list) -> dict:
     result = dict()
 
@@ -35,19 +49,7 @@ def _parse_url_with_top_domain(url, top_domain):
                                                             r"(?:\#(?P<fragment>[^#?\r\n]*))?" \
                                                             r"(?:\?(?P<query>.*(?=$)))*$"
 
-    dict_data = {
-        'protocol': None,
-        'sub_domain': None,
-        'domain': None,
-        'top_domain': None,
-        'host': None,
-        'port': None,
-        'path': None,
-        'dir': None,
-        'file': None,
-        'fragment': None,
-        'query': None
-    }
+    dict_data = DICT_NONE
     match = re.search(regex, url)
 
     dict_data['protocol'] = match.group('protocol') if match.group('protocol') else None
@@ -79,20 +81,11 @@ def _parse_url_without_top_domain(url):
             r"(?:\#(?P<fragment>[^#?\r\n]*))?" \
             r"(?:\?(?P<query>.*(?=$)))*$"
 
-    dict_data = {
-        'protocol': None,
-        'sub_domain': None,
-        'domain': None,
-        'top_domain': None,
-        'host': None,
-        'port': None,
-        'path': None,
-        'dir': None,
-        'file': None,
-        'fragment': None,
-        'query': None
-    }
+    dict_data = DICT_NONE
     match = re.search(regex, url)
+
+    if not match:
+        return dict_data
 
     dict_data['protocol'] = match.group('protocol') if match.group('protocol') else None
     dict_data['host'] = match.group('host') if match.group('host') else None
@@ -114,6 +107,9 @@ def _parse_url_with_public_suffix(url):
 
     domain_regex = re.compile(r"^(.+://)?(?:[^@/\n]+@)?(?P<domain>[^:/#?\n]+)", re.IGNORECASE)
     match = re.search(domain_regex, url)
+
+    if not match:
+        return DICT_NONE
 
     domain = match.group('domain')
     domain_parts = domain.split('.')

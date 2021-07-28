@@ -1,5 +1,8 @@
 ### Changelog:
 
+##### v3.0.3-optimus3
+* Included handling for some cases
+
 ##### v3.0.3-optimus1
 * Included `host` value
 
