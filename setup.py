@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='url_parser',
-      version='3.0.3-optimus3',
+      version='3.0.3-optimus4',
       description='Parse url and get all the different parts out of it',
       url='https://github.com/AdaptedAS/url_parser',
       author='Odd Jøren Røland',

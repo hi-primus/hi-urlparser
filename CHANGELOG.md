@@ -1,5 +1,8 @@
 ### Changelog:
 
+##### v3.0.3-optimus4
+* Fixed default dictionary being modified bug
+
 ##### v3.0.3-optimus3
 * Included handling for some cases
 

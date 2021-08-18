@@ -49,7 +49,7 @@ def _parse_url_with_top_domain(url, top_domain):
                                                             r"(?:\#(?P<fragment>[^#?\r\n]*))?" \
                                                             r"(?:\?(?P<query>.*(?=$)))*$"
 
-    dict_data = DICT_NONE
+    dict_data = DICT_NONE.copy()
     match = re.search(regex, url)
 
     dict_data['protocol'] = match.group('protocol') if match.group('protocol') else None
@@ -81,7 +81,7 @@ def _parse_url_without_top_domain(url):
             r"(?:\#(?P<fragment>[^#?\r\n]*))?" \
             r"(?:\?(?P<query>.*(?=$)))*$"
 
-    dict_data = DICT_NONE
+    dict_data = DICT_NONE.copy()
     match = re.search(regex, url)
 
     if not match:
