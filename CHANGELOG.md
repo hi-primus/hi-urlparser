@@ -1,5 +1,8 @@
 ### Changelog:
 
+##### v3.0.4
+* Changed package name
+
 ##### v3.0.3-optimus4
 * Fixed default dictionary being modified bug
 

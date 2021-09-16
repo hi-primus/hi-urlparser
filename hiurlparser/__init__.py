@@ -1,7 +1,7 @@
 import re
 import warnings
 
-from url_parser.public_suffix_list import PublicSuffixList
+from hiurlparser.public_suffix_list import PublicSuffixList
 
 public_suffix = PublicSuffixList.get_list()
 public_suffix.sort()

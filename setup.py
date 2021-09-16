@@ -3,16 +3,16 @@ from setuptools import setup
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-setup(name='url_parser',
-      version='3.0.3-optimus4',
+setup(name='hi-urlparser',
+      version='3.0.4',
       description='Parse url and get all the different parts out of it',
-      url='https://github.com/AdaptedAS/url_parser',
+      url='https://github.com/hi-primus/hi-urlparser',
       author='Odd Jøren Røland',
       long_description=long_description,
       long_description_content_type="text/markdown",
       author_email='odd@adapted.no',
       license='MIT',
-      packages=['url_parser'],
+      packages=['hiurlparser'],
       platforms=['any'],
       include_package_data=True,
       classifiers=[

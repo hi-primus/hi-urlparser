@@ -1,42 +1,40 @@
 # Python URL Parser
-![PyPI - Format](https://img.shields.io/pypi/format/url-parser)
-![PyPI - Status](https://img.shields.io/pypi/status/url-parser)
-![Downloads](https://pepy.tech/badge/url-parser)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/url-parser)
+![PyPI - Format](https://img.shields.io/pypi/format/hi-urlparser)
+![PyPI - Status](https://img.shields.io/pypi/status/hi-urlparser)
+![Downloads](https://pepy.tech/badge/hi-urlparser)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/hi-urlparser)
 
-A nice package to help you parse all types of URL's in vanilla python and return the parsed URL in groups.<br />
+A nice package to help you parse all types of URL's in vanilla python and return the parsed URL in groups.
 
-To not brake the API `parse_url` (returns a dict) still works and we made `get_url` to get the url parts as as object instead.
-
-In version 2.1 we also included `get_basic_url` a small yet neat function to get a the main url back from a string
+Version 2.1 also included `get_base_url` a small yet neat function to get a the main url back from a string
 
 ### Installation
 ```
-pip install url-parser
+pip install hi-urlparser
 ```
 
 ### Usage
 
 ```python
-from url_parser import parse_url, get_url, get_base_url
+from hiurlparser import parse_url, get_base_url
 
 
-url = parse_url('https://open.prospecta.app/my_user_login?user=url-parser&password=H3ll0') # returns url sections as a dict  
-url_object = get_url('https://open.prospecta.app/my_user_login?user=url-parser&password=H3ll0') # Does the same, bur returns a object  
-basic_url = get_base_url('https://open.prospecta.app/my_user_login?user=url-parser&password=H3ll0') # Returns just the main url  
+url = parse_url('https://open.prospecta.app/my_user_login?user=hi-urlparser&password=H3ll0') # returns url sections as a dict  
+url_object = get_url('https://open.prospecta.app/my_user_login?user=hi-urlparser&password=H3ll0') # Does the same, bur returns a object  
+basic_url = get_base_url('https://open.prospecta.app/my_user_login?user=hi-urlparser&password=H3ll0') # Returns just the main url  
 
 print(url['domain']) # Outputs -> prospecta  
 print(url_object.domain) # Outputs -> prospecta  
 print(basic_url) # Outputs -> https://open.prospecta.app  
 ```
 
-### Keywords `get_url` and `parse_url`
+### Keywords `parse_url`
 
-When using the `parse_url` and `get_url` function, you get a dict (parse_url) or object (get_url) back with different parts of the URL.
+When using the `parse_url` function, you get a dict back with different parts of the URL.
 
-The different parts can be accessed by keywords:<br />
-For `parse_url` use: `result['top_domain]`<br />
-For `get_url` use: `result.top_domain`
+The different parts can be accessed by keywords:
+
+For `parse_url` use: `result['top_domain]`
 
 
 Here is a list of all the available keywords:
@@ -59,7 +57,7 @@ Here is a list of all the available keywords:
 Use the following command to run tests.
 
 ```bash
-python -m unittest url_parser.tests.test_url_parser
+python -m unittest hiurlparser.tests.test_url_parser
 ```
 
 ### Changelog:
